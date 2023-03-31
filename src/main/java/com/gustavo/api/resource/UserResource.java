@@ -1,5 +1,6 @@
 package com.gustavo.api.resource;
 
+import com.gustavo.api.domain.User;
 import com.gustavo.api.domain.dto.UserDTO;
 import com.gustavo.api.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,11 @@ public class UserResource {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(service.create(obj).getId()).toUri();
         return ResponseEntity.created(uri).build();
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<UserDTO> update(@RequestBody UserDTO obj, @PathVariable Integer id) {
+        obj.setId(id);
+        return ResponseEntity.ok(mapper.map(service.update(obj), UserDTO.class));
     }
 }
