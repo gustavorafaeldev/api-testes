@@ -1,6 +1,5 @@
 package com.gustavo.api.resource;
 
-import com.gustavo.api.domain.User;
 import com.gustavo.api.domain.dto.UserDTO;
 import com.gustavo.api.service.UserService;
 import lombok.RequiredArgsConstructor;

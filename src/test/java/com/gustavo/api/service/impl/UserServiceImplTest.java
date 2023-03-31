@@ -3,24 +3,22 @@ package com.gustavo.api.service.impl;
 import com.gustavo.api.domain.User;
 import com.gustavo.api.domain.dto.UserDTO;
 import com.gustavo.api.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
     public static final Integer ID = 1;
@@ -49,11 +47,16 @@ class UserServiceImplTest {
 
     @Test
     void whenFindByIdThenReturnAnUserInstance() {
-        Mockito.when(repository.findById(Mockito.anyInt())).thenReturn(optionalUser);
+        when(repository.findById(anyInt())).thenReturn(optionalUser);
 
         User response = service.findById(ID);
 
-        Assertions.assertEquals(User.class, response.getClass());
+        assertNotNull(response);
+
+        assertEquals(User.class, response.getClass());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(EMAIL, response.getEmail());
     }
 
     @Test
@@ -73,11 +76,8 @@ class UserServiceImplTest {
     }
 
     private void startUser() {
-        user = new User(ID, NAME, EMAIL, PASSWORD);
+        user = new User(ID, NAME, EMAIL,  PASSWORD);
         userDTO = new UserDTO(ID, NAME, EMAIL, PASSWORD);
         optionalUser = Optional.of(new User(ID, NAME, EMAIL, PASSWORD));
-        System.out.println(user);
-        System.out.println(userDTO);
-        System.out.println(optionalUser);
     }
 }
