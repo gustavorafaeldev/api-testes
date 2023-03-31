@@ -4,6 +4,7 @@ import com.gustavo.api.domain.User;
 import com.gustavo.api.domain.dto.UserDTO;
 import com.gustavo.api.repository.UserRepository;
 import com.gustavo.api.service.UserService;
+import com.gustavo.api.service.exception.DataIntegratyViolationException;
 import com.gustavo.api.service.exception.ObjectNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -32,6 +33,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(UserDTO obj) {
+        findByEmail(obj);
         return repository.save(mapper.map(obj, User.class));
+    }
+
+    private void findByEmail(UserDTO obj) {
+        Optional<User> user = repository.findByEmail(obj.getEmail());
+        if (user.isEmpty()) throw new DataIntegratyViolationException("E-mail já cadastrado no sistema!");
     }
 }
