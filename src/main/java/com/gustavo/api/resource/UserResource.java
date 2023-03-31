@@ -1,11 +1,9 @@
 package com.gustavo.api.resource;
 
-import com.gustavo.api.domain.User;
 import com.gustavo.api.domain.dto.UserDTO;
 import com.gustavo.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
