@@ -52,11 +52,11 @@ class UserServiceImplTest {
         User response = service.findById(ID);
 
         assertNotNull(response);
-
         assertEquals(User.class, response.getClass());
         assertEquals(ID, response.getId());
         assertEquals(NAME, response.getName());
         assertEquals(EMAIL, response.getEmail());
+
     }
 
     @Test
