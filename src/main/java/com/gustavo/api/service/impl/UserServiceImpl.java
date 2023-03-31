@@ -3,6 +3,7 @@ package com.gustavo.api.service.impl;
 import com.gustavo.api.domain.User;
 import com.gustavo.api.repository.UserRepository;
 import com.gustavo.api.service.UserService;
+import com.gustavo.api.service.exception.ObjectNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findById(Integer id) {
         Optional<User> obj = repository.findById(id);
-        return obj.orElse(null);
+        return obj.orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado!"));
     }
 }
