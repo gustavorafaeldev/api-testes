@@ -2,7 +2,6 @@ package com.gustavo.api.resource;
 
 import com.gustavo.api.domain.dto.UserDTO;
 import com.gustavo.api.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
