@@ -4,6 +4,7 @@ import com.gustavo.api.domain.dto.UserDTO;
 import com.gustavo.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -14,13 +15,15 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("user")
-@RequiredArgsConstructor
 public class UserResource {
 
     public static final String ID = "{id}";
-    private final UserService service;
 
-    private final ModelMapper mapper;
+    @Autowired
+    private UserService service;
+
+    @Autowired
+    private ModelMapper mapper;
 
     @GetMapping(ID)
     public ResponseEntity<UserDTO> findById(@PathVariable Integer id) {
