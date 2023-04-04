@@ -4,7 +4,7 @@ import com.gustavo.api.domain.User;
 import com.gustavo.api.domain.dto.UserDTO;
 import com.gustavo.api.repository.UserRepository;
 import com.gustavo.api.service.UserService;
-import com.gustavo.api.service.exception.DataIntegratyViolationException;
+import com.gustavo.api.service.exception.DataIntegrityViolationException;
 import com.gustavo.api.service.exception.ObjectNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     private void findByEmail(UserDTO obj) {
         Optional<User> user = repository.findByEmail(obj.getEmail());
         if (user.isPresent() && !user.get().getId().equals(obj.getId())) {
-            throw new DataIntegratyViolationException("E-mail já cadastrado no sistema!");
+            throw new DataIntegrityViolationException("E-mail já cadastrado no sistema!");
         }
     }
 }
