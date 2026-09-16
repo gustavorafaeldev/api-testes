@@ -55,8 +55,9 @@ jobs:
               set -- $nsdev
               ns="$1"
               dev="$2"
-              sudo ip netns exec "$ns" tc qdisc add dev "$dev" root handle 1: tbf rate 20mbit burst 64kb latency 400ms
-              sudo ip netns exec "$ns" tc qdisc add dev "$dev" parent 1:1 handle 10: netem delay 20ms loss "${loss}%"
+              sudo ip netns exec "$ns" tc qdisc add dev "$dev" root handle 1: htb default 10
+              sudo ip netns exec "$ns" tc class add dev "$dev" parent 1: classid 1:10 htb rate 20mbit ceil 20mbit burst 15k cburst 15k
+              sudo ip netns exec "$ns" tc qdisc add dev "$dev" parent 1:10 handle 10: netem delay 20ms loss "${loss}%"
             done
 
             sudo ip netns exec h1 iperf3 -s -D
