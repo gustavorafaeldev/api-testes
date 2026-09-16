@@ -70,7 +70,7 @@ jobs:
               fi
               out="/tmp/${scenario}_${algo}.json"
               sudo ip netns exec h2 iperf3 -c 10.0.0.1 -t 10 -i 1 -C "$algo" -J > "$out"
-              python3 -c 'import json,sys; d=json.load(open(sys.argv[3])); s=d["end"]["sum_sent"]; print("RESULT|%s|%s|%.3f|%s" % (sys.argv[1],sys.argv[2],s["bits_per_second"]/1e6,s.get("retransmits",0)))' "$scenario" "$algo" "$out"
+              python3 -c 'import json,sys; d=json.load(open(sys.argv[3])); rx=d["end"]["sum_received"]; tx=d["end"]["sum_sent"]; print("RESULT|%s|%s|%.3f|%s" % (sys.argv[1],sys.argv[2],rx["bits_per_second"]/1e6,tx.get("retransmits",0)))' "$scenario" "$algo" "$out"
             done
           }
 
