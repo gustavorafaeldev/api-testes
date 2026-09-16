@@ -1,0 +1,92 @@
+name: TCP congestion benchmark
+
+on:
+  push:
+    branches:
+      - chatgpt-tcp-congestion-benchmark-20260915
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Prepare tools (no apt update)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          uname -a
+          if ! command -v iperf3 >/dev/null 2>&1; then
+            sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y iperf3
+          fi
+          iperf3 --version
+          sudo modprobe tcp_cubic || true
+          sudo modprobe tcp_bbr || true
+          echo "AVAILABLE=$(cat /proc/sys/net/ipv4/tcp_available_congestion_control)"
+          command -v ip
+          command -v tc
+
+      - name: Run 6 tests
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cleanup() {
+            sudo ip netns del h1 2>/dev/null || true
+            sudo ip netns del h2 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          run_scenario() {
+            local scenario="$1"
+            local loss="$2"
+            cleanup
+
+            sudo ip netns add h1
+            sudo ip netns add h2
+            sudo ip link add veth-h1 type veth peer name veth-h2
+            sudo ip link set veth-h1 netns h1
+            sudo ip link set veth-h2 netns h2
+
+            sudo ip netns exec h1 ip addr add 10.0.0.1/24 dev veth-h1
+            sudo ip netns exec h2 ip addr add 10.0.0.2/24 dev veth-h2
+            sudo ip netns exec h1 ip link set lo up
+            sudo ip netns exec h2 ip link set lo up
+            sudo ip netns exec h1 ip link set veth-h1 up
+            sudo ip netns exec h2 ip link set veth-h2 up
+
+            # Enlace equivalente ao roteiro: 20 Mbps, 20 ms unidirecionais e perda configurada.
+            for nsdev in "h1 veth-h1" "h2 veth-h2"; do
+              set -- $nsdev
+              ns="$1"; dev="$2"
+              sudo ip netns exec "$ns" tc qdisc add dev "$dev" root handle 1: tbf rate 20mbit burst 64kb latency 400ms
+              sudo ip netns exec "$ns" tc qdisc add dev "$dev" parent 1:1 handle 10: netem delay 20ms loss "${loss}%"
+            done
+
+            sudo ip netns exec h1 iperf3 -s -D
+            sleep 1
+
+            available="$(cat /proc/sys/net/ipv4/tcp_available_congestion_control)"
+            for algo in reno cubic bbr; do
+              if ! grep -qw "$algo" <<<"$available"; then
+                echo "RESULT|${scenario}|${algo}|N/A|N/A"
+                continue
+              fi
+              out="/tmp/${scenario}_${algo}.json"
+              sudo ip netns exec h2 iperf3 -c 10.0.0.1 -t 10 -i 1 -C "$algo" -J > "$out"
+              python3 - "$scenario" "$algo" "$out" <<'PY'
+import json, sys
+scenario, algo, path = sys.argv[1:]
+with open(path) as f:
+    data = json.load(f)
+s = data["end"]["sum_sent"]
+mbps = s["bits_per_second"] / 1_000_000
+retx = s.get("retransmits", 0)
+print(f"RESULT|{scenario}|{algo}|{mbps:.3f}|{retx}")
+PY
+            done
+          }
+
+          echo "=== BEGIN RESULTS ==="
+          run_scenario c1 0
+          run_scenario c2 2
+          echo "=== END RESULTS ==="
